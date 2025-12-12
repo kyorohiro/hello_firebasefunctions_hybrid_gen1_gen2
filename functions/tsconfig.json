@@ -1,0 +1,7 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./gen1" },
+    { "path": "./gen2" }
+  ]
+}

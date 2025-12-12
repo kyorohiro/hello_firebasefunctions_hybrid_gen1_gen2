@@ -1,0 +1,41 @@
+{
+  "firestore": {
+    "database": "(default)",
+    "location": "asia-northeast1",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "functions": [
+    {
+      "source": "functions/gen1",
+      "codebase": "gen1",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "bash -lc 'set -eux; cd \"$RESOURCE_DIR\"; node ./node_modules/typescript/bin/tsc -p tsconfig.json; find lib -maxdepth 3 -type f -name \"index.js\" -print'"
+      ]
+    },
+    {
+      "source": "functions/gen2",
+      "codebase": "gen2",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "bash -lc 'set -eux; cd \"$RESOURCE_DIR\"; node ./node_modules/typescript/bin/tsc -p tsconfig.json; find lib -maxdepth 3 -type f -name \"index.js\" -print'"
+      ]
+    }
+  ],
+  "storage": {
+    "rules": "storage.rules"
+  }
+}
