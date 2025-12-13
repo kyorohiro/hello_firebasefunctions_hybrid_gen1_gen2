@@ -97,12 +97,13 @@ export const helloV1Proxy = functions
         method === "GET" || method === "HEAD" ? undefined : (req as any).rawBody;
 
       console.log(`Proxying to ${target.toString()}`,{
+        GEN2_BASE_URL,
         method,
         headers,
         body,
         redirect: "manual",
       });
-      const r = await fetch(target.toString(), {
+      const r = await fetch(GEN2_BASE_URL, {
         method,
         headers,
         body,
