@@ -184,6 +184,82 @@ This guarantees that each deployment uses a fresh build output.
 
 
 
+# 🚧 **Official note on gen1→gen2 migration**
+
+Firebase officially states:
+
+> *“Upgrading from 1st Gen to 2nd Gen is not yet supported.”*  
+> (https://firebase.google.com/docs/functions/2nd-gen-upgrade)
+
+This means that functions **cannot be converted in-place** from gen1 to gen2
+using the same name and codebase.
+
+While it is technically possible in many cases to delete a gen1 function
+and recreate a gen2 function with the same name, this **is not guaranteed**
+by Firebase documentation and should not be treated as a formally supported
+migration path without exhaustive testing.
+
+
+
+## Migration notes (gen1 -> gen2): common pitfalls
+
+Migrating from Firebase Functions gen1 to gen2 is not just a code change.
+Most issues come from deployment rules, URLs, and operational constraints.
+
+### 1) No in-place upgrade (same name)
+You cannot "upgrade" an existing gen1 function to gen2 under the same function name.
+Deploying a gen2 function with the same name as a gen1 function fails.
+
+**Implication:**
+- Use a new name for gen2 during the migration, or
+- Accept a destructive cutover (delete gen1 first, then create gen2).
+
+### 2) URL / endpoint changes
+gen2 is backed by Cloud Run and introduces different URLs.
+Even though Cloud Functions URLs exist for gen2, planning endpoint compatibility is critical.
+
+**Implication:**
+- Released clients that hardcode gen1 URLs must be migrated intentionally.
+
+### 3) Auth user lifecycle triggers are gen1-only
+Triggers such as `auth.user().onCreate` and `auth.user().onDelete` are gen1-only (as of now).
+
+**Implication:**
+- A gen2-only architecture is not feasible if you rely on these hooks.
+- gen1 must remain until the platform provides gen2 equivalents.
+
+### 4) Deployment becomes the bottleneck (WRITE quota / large projects)
+With many functions (e.g., 200+), deployments become slow and fragile.
+This is especially true in hybrid gen1/gen2 projects.
+
+**Implication:**
+- Always deploy in small units using `--only`.
+- Avoid "deploy everything" workflows.
+
+### 5) Permissions / invoker differences
+Public HTTP behavior differs across gen1/gen2 and may require explicit IAM settings.
+Assume nothing is public until verified.
+
+**Implication:**
+- Verify invocation permissions for each function after deployment.
+- Document the intended exposure policy (public vs internal).
+
+### 6) Build & packaging differences
+Monorepo/workspaces and TypeScript builds can behave differently under Firebase CLI.
+`$RESOURCE_DIR` and workspace behavior are frequent sources of build surprises.
+
+**Implication:**
+- Keep each codebase self-contained for build reproducibility.
+- Prefer deterministic `predeploy` scripts per codebase.
+
+### 7) Function count / per-region limits
+Function count limits exist per region, and gen2 counts interact with Cloud Run services.
+Large projects must plan function/service growth carefully.
+
+**Implication:**
+- Reduce "1 endpoint = 1 function" patterns.
+- Prefer fewer gen2 functions with internal routing (Express Router) when possible.
+
 
 # deploy 
 
@@ -193,7 +269,14 @@ npm i
 cd ./functions/gen2
 npm i
 firebase deploy --only "functions:gen1:helloV1"
+firebase deploy --only "functions:gen1:hourlyJobV1"
+firebase deploy --only "functions:gen1:onUserDeleteV1"
+firebase deploy --only "functions:gen1:helloV1Proxy"
+
 firebase deploy --only "functions:gen2:helloV2"
+firebase deploy --only "functions:gen2:pingLogV2"
+firebase deploy --only "functions:gen2:helloV1"
+
 ```
 
 https://asia-northeast1-hello-funcs-v1v2.cloudfunctions.net/helloV1
