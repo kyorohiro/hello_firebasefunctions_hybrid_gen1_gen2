@@ -188,11 +188,16 @@ This guarantees that each deployment uses a fresh build output.
 # deploy 
 
 ```
+cd ./functions/gen1
+npm i
+cd ./functions/gen2
+npm i
 firebase deploy --only "functions:gen1:helloV1"
 firebase deploy --only "functions:gen2:helloV2"
 ```
 
 https://asia-northeast1-hello-funcs-v1v2.cloudfunctions.net/helloV1
+https://asia-northeast1-hello-funcs-v1v2.cloudfunctions.net/helloV2
 
 
 # setting 

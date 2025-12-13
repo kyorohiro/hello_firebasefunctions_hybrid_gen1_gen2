@@ -6,7 +6,9 @@ import { writeSystemLog } from "../src/log";
 setGlobalOptions({ region: "asia-northeast1" });
 
 // ✅ Express Router (V2)
-export const helloV2 = onRequest({ invoker: "public" }, createHelloApp());
+export const helloV2 = onRequest({ invoker: "public" }, createHelloApp(" from V2"));
+
+export const helloV1 = onRequest({ invoker: "public" }, createHelloApp(" from V2"));
 
 // （おまけ）V2でも動作確認ログを残したいなら：
 // createHelloApp() 側で writeSystemLog を呼ぶのは簡単だけど、

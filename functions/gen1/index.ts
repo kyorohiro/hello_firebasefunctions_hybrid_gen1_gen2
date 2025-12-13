@@ -5,7 +5,7 @@ import { writeSystemLog } from "../src/log";
 // ✅ Express Router (V1)
 export const helloV1 = functions
   .region("asia-northeast1")
-  .https.onRequest(createHelloApp());
+  .https.onRequest(createHelloApp(" from V1"));
 
 // ✅ Auth onDelete (V1 only)
 
