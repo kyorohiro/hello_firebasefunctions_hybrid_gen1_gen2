@@ -71,7 +71,15 @@ export const helloV1Proxy = functions
 
       // 転送先 URL（クエリ維持）
       const target = new URL(GEN2_BASE_URL);
-      target.pathname = forwardedPath;
+
+      const fp = forwardedPath.startsWith("/") ? forwardedPath : `/${forwardedPath}`;
+
+      // base.pathname: "/helloV1" の末尾スラッシュを整える
+      const basePath = target.pathname.replace(/\/$/, "");
+
+      // ★ 結合して "/helloV1/hello" にする
+      target.pathname = basePath + fp;
+      /// target.pathname = forwardedPath;
       target.search = u.search;
 
       // headers 構築
@@ -85,7 +93,9 @@ export const helloV1Proxy = functions
       headers.delete("host");
       headers.delete("connection");
       headers.delete("content-length");
-
+      //
+      headers.delete("accept-encoding");          // ★重要
+      headers.set("accept-encoding", "identity"); // ★さらに確実（どっちかでOK）
       // 追加で「元のホスト」を渡したければ（任意）
       headers.set("x-forwarded-host", req.headers.host || "");
       headers.set("x-forwarded-proto", "https");
@@ -96,14 +106,14 @@ export const helloV1Proxy = functions
       const body =
         method === "GET" || method === "HEAD" ? undefined : (req as any).rawBody;
 
-      console.log(`Proxying to ${target.toString()}`,{
-        GEN2_BASE_URL,
+      console.log(`Proxying to ${target.toString()}`, {
+        href: target.href,
         method,
         headers,
         body,
         redirect: "manual",
       });
-      const r = await fetch(GEN2_BASE_URL, {
+      const r = await fetch(target.href, {
         method,
         headers,
         body,
