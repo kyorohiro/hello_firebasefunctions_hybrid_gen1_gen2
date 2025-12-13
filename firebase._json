@@ -17,8 +17,7 @@
         "*.local"
       ],
       "predeploy": [
-        "bash -lc 'set -eux; cd \"$RESOURCE_DIR\"; rm -rf lib'",
-        "bash -lc 'set -eux; cd \"$RESOURCE_DIR\"; node ./node_modules/typescript/bin/tsc -p tsconfig.json'"
+        "bash -lc 'set -eux; cd \"$RESOURCE_DIR\"; node ./node_modules/typescript/bin/tsc -p tsconfig.json; find lib -maxdepth 3 -type f -name \"index.js\" -print'"
       ]
     },
     {

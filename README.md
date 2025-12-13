@@ -134,10 +134,70 @@ This project documents:
 
 This repository exists to make these constraints **explicit and understandable**.
 
+## Build process during Firebase deploy
 
+### Why `npm run build` is not used in `predeploy`
+
+During `firebase deploy`, this project **does not execute `npm run build`**.
+Instead, the TypeScript compiler is invoked directly:
+
+```bash
+node ./node_modules/typescript/bin/tsc -p tsconfig.json
+```
+
+### Reason
+
+The Firebase CLI internally uses its own bundled version of npm.
+In this environment, running npm run build from predeploy may fail
+before the build step starts (for example, due to stdin or script-shell
+issues inside the Firebase runtime).
+
+To ensure deterministic and stable deployments, we intentionally bypass
+npm run and invoke tsc directly via node.
+
+### Notes
+
+- The logical build definition still exists in package.json.
+
+- This direct invocation is used only during Firebase deployment.
+
+- For local development, continue to use:
+
+```
+npm run build
+```
+
+- If Firebase CLI / npm behavior changes in the future, this step can be
+reverted back to npm run build.
+
+
+### Deployment safety
+
+Before compiling, the output directory is cleaned to prevent stale artifacts:
+
+```
+rm -rf lib
+
+```
+
+This guarantees that each deployment uses a fresh build output.
+
+
+
+
+# deploy 
+
+```
 firebase deploy --only "functions:gen1:helloV1"
 firebase deploy --only "functions:gen2:helloV2"
+```
 
+https://asia-northeast1-hello-funcs-v1v2.cloudfunctions.net/helloV1
+
+
+# setting 
+
+```
 gcloud auth login
 gcloud config set project hello-funcs-v1v2
 
@@ -145,3 +205,4 @@ gcloud functions add-iam-policy-binding helloV1 \
   --region=asia-northeast1 \
   --member="allUsers" \
   --role="roles/cloudfunctions.invoker"
+```

@@ -1,6 +1,6 @@
 import { createHelloApp } from "../src/express_app";
 import * as functions from "firebase-functions";
-// import { writeSystemLog } from "../../src/log";
+import { writeSystemLog } from "../src/log";
 
 // ✅ Express Router (V1)
 export const helloV1 = functions
@@ -8,7 +8,7 @@ export const helloV1 = functions
   .https.onRequest(createHelloApp());
 
 // ✅ Auth onDelete (V1 only)
-/*
+
 export const onUserDeleteV1 = functions
   .region("asia-northeast1")
   .auth.user()
@@ -33,4 +33,3 @@ export const hourlyJobV1 = functions
       note: "hourly tick",
     });
   });
-*/
