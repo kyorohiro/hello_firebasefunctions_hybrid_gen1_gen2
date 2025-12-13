@@ -64,8 +64,9 @@ export const helloV1Proxy = functions
       }
       // もし想定外のパスなら、そのまま投げずに 400 にして事故を防ぐ
       else {
-        res.status(400).send(`Bad proxy path: expected prefix ${prefix}, got ${u.pathname}`);
-        return;
+        forwardedPath = u.pathname;
+        //res.status(400).send(`Bad proxy path: expected prefix ${prefix}, got ${u.pathname} ${req.method}`);
+        //return;
       }
 
       // 転送先 URL（クエリ維持）
@@ -95,6 +96,12 @@ export const helloV1Proxy = functions
       const body =
         method === "GET" || method === "HEAD" ? undefined : (req as any).rawBody;
 
+      console.log(`Proxying to ${target.toString()}`,{
+        method,
+        headers,
+        body,
+        redirect: "manual",
+      });
       const r = await fetch(target.toString(), {
         method,
         headers,
